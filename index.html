@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bất ngờ chưa!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .btn-troll {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: #ff4757;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-troll:hover {
+            transform: scale(1.05);
+            background: #ff6b81;
+        }
+
+        .btn-troll:active {
+            transform: scale(0.95);
+        }
+
+        .sensor-panel {
+            margin-top: 25px;
+            display: none;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .sensor-item {
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            word-break: break-word;
+        }
+
+        /* Hiệu ứng rung màn hình */
+        .active-troll {
+            animation: shake 0.2s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-2px, 0px) rotate(1deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            60% { transform: translate(-2px, 1px) rotate(0deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+        <h1 id="titleText">Bấm vào đây để nhận link! 🎁</h1>
+        <button class="btn-troll" id="trollBtn" onclick="startTroll()">MỞ QUÀ NGAY</button>
+
+        <div class="sensor-panel" id="sensorPanel">
+            <h2 style="color: #ff4757; text-align: center; margin-top: 0;">⚠️ ĐÃ KÍCH HOẠT QUÉT CẢM BIẾN ⚠️</h2>
+            <div id="sensorList"></div>
+        </div>
+    </div>
+
+    <script>
+        let isTrolling = false;
+        let audioCtx = null;
+
+        // Hàm phát âm thanh tiếng cười tối ưu cho Safari iOS
+        function playLaughSound() {
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return;
+
+                if (!audioCtx) {
+                    audioCtx = new AudioContextClass();
+                }
+
+                // Kích hoạt Audio Context bị suspended trên iOS
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const laughPitches = [350, 550, 300, 600, 350, 650, 280, 500];
+                let time = audioCtx.currentTime;
+
+                laughPitches.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, time + index * 0.1);
+                    
+                    gain.gain.setValueAtTime(0.3, time + index * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + (index + 1) * 0.1);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(time + index * 0.1);
+                    osc.stop(time + (index + 1) * 0.1);
+                });
+            } catch (e) {
+                console.log("Audio Error:", e);
+            }
+        }
+
+        async function startTroll() {
+            if (isTrolling) return;
+            isTrolling = true;
+
+            // Hiệu ứng giao diện
+            document.body.classList.add('active-troll');
+            document.getElementById('titleText').innerText = "🤣 CÓ CÁI LỒN NHA! 🤣";
+            document.getElementById('trollBtn').style.display = 'none';
+            document.getElementById('sensorPanel').style.display = 'block';
+
+            // Phát tiếng cười liên tục mỗi 1 giây
+            playLaughSound();
+            setInterval(playLaughSound, 1000);
+
+            // Rung thiết bị (Lưu ý: iOS không hỗ trợ API này)
+            if ("vibrate" in navigator) {
+                navigator.vibrate([200, 100, 200, 100, 400]);
+            }
+
+            // Xin quyền & Khởi tạo cảm biến
+            await initSensorsIOS();
+        }
+
+        // Cập nhật giao diện danh sách cảm biến
+        function updateSensorInfo(id, name, value) {
+            const list = document.getElementById('sensorList');
+            let el = document.getElementById('sensor-' + id);
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'sensor-' + id;
+                el.className = 'sensor-item';
+                list.appendChild(el);
+            }
+            el.innerHTML = `<strong style="color: #4bcffa;">${name}:</strong> ${value}`;
+        }
+
+        // Hàm xin quyền và đọc cảm biến dành riêng cho iOS & Android
+        async function initSensorsIOS() {
+            // 1. Cảm biến nghiêng thiết bị (Device Orientation)
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const response = await DeviceOrientationEvent.requestPermission();
+                    if (response === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                    } else {
+                        updateSensorInfo('orientation', 'Cảm biến xoay', 'Bị từ chối quyền trên iOS');
+                    }
+                } catch (err) {
+                    updateSensorInfo('orientation', 'Cảm biến xoay', 'Lỗi cấp quyền iOS');
+                }
+            } else if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation);
+            } else {
+                updateSensorInfo('orientation', 'Cảm biến xoay', 'Không hỗ trợ');
+            }
+
+            // 2. Gia tốc kế (Device Motion)
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const response = await DeviceMotionEvent.requestPermission();
+                    if (response === 'granted') {
+                        window.addEventListener('devicemotion', handleMotion);
+                    } else {
+                        updateSensorInfo('motion', 'Gia tốc kế', 'Bị từ chối quyền trên iOS');
+                    }
+                } catch (err) {
+                    updateSensorInfo('motion', 'Gia tốc kế', 'Lỗi cấp quyền iOS');
+                }
+            } else if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', handleMotion);
+            } else {
+                updateSensorInfo('motion', 'Gia tốc kế', 'Không hỗ trợ');
+            }
+
+            // 3. Thông tin màn hình & Điểm cảm ứng
+            updateSensorInfo('screen', 'Độ phân giải màn hình', 
+                `${window.screen.width} x ${window.screen.height} (Độ xoay: ${window.orientation !== undefined ? window.orientation : 0}°)`);
+
+            updateSensorInfo('touch', 'Điểm cảm ứng đồng thời', 
+                `${navigator.maxTouchPoints || 1} điểm`);
+
+            // 4. Cảm biến ánh sáng (Không hỗ trợ trên Safari iOS)
+            updateSensorInfo('light', 'Cảm biến ánh sáng', 'iOS Safari không hỗ trợ API này');
+
+            // 5. Trạng thái Pin (Không hỗ trợ trên Safari iOS do lý do bảo mật)
+            if (navigator.getBattery) {
+                navigator.getBattery().then(battery => {
+                    const updateBattery = () => {
+                        updateSensorInfo('battery', 'Thông tin Pin', 
+                            `${Math.round(battery.level * 100)}% (${battery.charging ? 'Đang sạc ⚡' : 'Không sạc'})`);
+                    };
+                    updateBattery();
+                    battery.addEventListener('levelchange', updateBattery);
+                    battery.addEventListener('chargingchange', updateBattery);
+                });
+            } else {
+                updateSensorInfo('battery', 'Thông tin Pin', 'iOS Safari chặn Battery API');
+            }
+        }
+
+        // Event listener handler cho Orientation
+        function handleOrientation(e) {
+            updateSensorInfo('orientation', 'Cảm biến xoay (Orientation)', 
+                `Alpha: ${Math.round(e.alpha || 0)}°, Beta: ${Math.round(e.beta || 0)}°, Gamma: ${Math.round(e.gamma || 0)}°`);
+        }
+
+        // Event listener handler cho Motion
+        function handleMotion(e) {
+            const acc = e.accelerationIncludingGravity || {x: 0, y: 0, z: 0};
+            updateSensorInfo('motion', 'Gia tốc kế (Accelerometer)', 
+                `X: ${acc.x ? acc.x.toFixed(2) : 0}, Y: ${acc.y ? acc.y.toFixed(2) : 0}, Z: ${acc.z ? acc.z.toFixed(2) : 0}`);
+        }
+    </script>
+</body>
+</html>
